@@ -13,5 +13,5 @@ run: sudoku.x
 push: clean
 	clear
 	git add .
-	git commit
+	git commit -m $(m)
 	git push origin $(branch)
