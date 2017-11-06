@@ -1,7 +1,6 @@
-branch = master
 
 sudoku.x: sudoku.c
-	gcc -c -o sudoku.x sudoku.c
+	gcc sudoku.c -o sudoku.x -lpthread
 
 clean:
 	rm -f *.x *.o *~
@@ -35,5 +34,5 @@ push: clean
 	@echo
 	git add .
 	git commit
-	git push origin $(branch)
+	git push origin HEAD
 
