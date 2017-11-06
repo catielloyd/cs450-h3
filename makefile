@@ -1,7 +1,7 @@
 branch = master
 
 sudoku.x: sudoku.c
-	gcc -c -o sudoku.x sudoku.c
+	gcc sudoku.c -o sudoku.x -lpthread
 
 clean:
 	rm -f *.x *.o *~

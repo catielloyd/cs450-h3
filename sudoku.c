@@ -68,144 +68,37 @@ char* nameOfSubgrid(int i){
 }
 
 bool validateRow(struct Data* data, int row){
-    int one = 0,
-        two = 0,
-        three = 0,
-        four = 0,
-        five = 0,
-        six = 0,
-        seven = 0,
-        eight = 0,
-        nine = 0;
+    int rowCount[9] = {0,0,0,0,0,0,0,0,0};
     for(int i = 0; i < 9; i++){
-        switch(data->board[row][i]){
-            case 1:
-                one++;
-                if(one > 1)
-                    return false;
-                break;
-            case 2:
-                two++;
-                if(two > 1)
-                    return false;
-                break;
-            case 3:
-                three++;
-                if(three > 1)
-                    return false;
-                break;
-            case 4:
-                four++;
-                if(four > 1)
-                    return false;
-                break;
-            case 5:
-                five++;
-                if(five > 1)
-                    return false;
-                break;
-            case 6:
-                six++;
-                if(six > 1)
-                    return false;
-                break;
-            case 7:
-                seven++;
-                if(seven > 1)
-                    return false;
-                break;
-            case 8:
-                eight++;
-                if(eight > 1)
-                    return false;
-                break;
-            case 9:
-                nine++;
-                if(nine > 1)
-                    return false;
-                break;
-            default:
-                return false;
+        if(data->board[row][i] < 1 || data->board[row][i] > 9){
+           return false; 
+        }
+
+        rowCount[data->board[row][i] - 1]++;
+        if(rowCount[data->board[row][i] - 1] > 1){
+            return false;
         }
     }
     return true;
 }
 
 bool validateColumn(struct Data *data, int column){
-    int one = 0,
-            two = 0,
-            three = 0,
-            four = 0,
-            five = 0,
-            six = 0,
-            seven = 0,
-            eight = 0,
-            nine = 0;
+    int colCount[9] = {0,0,0,0,0,0,0,0,0};
     for(int i = 0; i < 9; i++){
-        switch(data->board[i][column]){
-            case 1:
-                one++;
-                if(one > 1)
-                    return false;
-                break;
-            case 2:
-                two++;
-                if(two > 1)
-                    return false;
-                break;
-            case 3:
-                three++;
-                if(three > 1)
-                    return false;
-                break;
-            case 4:
-                four++;
-                if(four > 1)
-                    return false;
-                break;
-            case 5:
-                five++;
-                if(five > 1)
-                    return false;
-                break;
-            case 6:
-                six++;
-                if(six > 1)
-                    return false;
-                break;
-            case 7:
-                seven++;
-                if(seven > 1)
-                    return false;
-                break;
-            case 8:
-                eight++;
-                if(eight > 1)
-                    return false;
-                break;
-            case 9:
-                nine++;
-                if(nine > 1)
-                    return false;
-                break;
-            default:
-                return false;
+        if(data->board[i][column] < 1 || data->board[i][column] > 9){
+           return false; 
+        }
+
+        colCount[data->board[i][column] - 1]++;
+        if(colCount[data->board[i][column] - 1] > 1){
+            return false;
         }
     }
     return true;
 }
 
 bool validateSquare(struct Data *data, int square){
-    int one = 0,
-            two = 0,
-            three = 0,
-            four = 0,
-            five = 0,
-            six = 0,
-            seven = 0,
-            eight = 0,
-            nine = 0;
-
+    int sqrCount[9] = {0,0,0,0,0,0,0,0,0};
     int columnStart = (square % 3) * 3;
     int columnEnd = columnStart + 3;
     int rowStart = (square / 3) * 3;
@@ -213,55 +106,14 @@ bool validateSquare(struct Data *data, int square){
 
     for(int i = rowStart; i < rowEnd; i++) {
         for (int j = columnStart; j < columnEnd; j++) {
-            switch (data->board[i][j]) {
-                case 1:
-                    one++;
-                    if (one > 1)
-                        return false;
-                    break;
-                case 2:
-                    two++;
-                    if (two > 1)
-                        return false;
-                    break;
-                case 3:
-                    three++;
-                    if (three > 1)
-                        return false;
-                    break;
-                case 4:
-                    four++;
-                    if (four > 1)
-                        return false;
-                    break;
-                case 5:
-                    five++;
-                    if (five > 1)
-                        return false;
-                    break;
-                case 6:
-                    six++;
-                    if (six > 1)
-                        return false;
-                    break;
-                case 7:
-                    seven++;
-                    if (seven > 1)
-                        return false;
-                    break;
-                case 8:
-                    eight++;
-                    if (eight > 1)
-                        return false;
-                    break;
-                case 9:
-                    nine++;
-                    if (nine > 1)
-                        return false;
-                    break;
-                default:
-                    return false;
-            }
+           if(data->board[i][j] < 1 || data->board[i][j] > 9){
+               return false;
+           }
+
+           sqrCount[data->board[i][j] - 1]++;
+           if(sqrCount[data->board[i][j] - 1] > 1){
+               return false;
+           }
         }
     }
     return true;
