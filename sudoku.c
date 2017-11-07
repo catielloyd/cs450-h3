@@ -11,6 +11,9 @@
 struct Data {
     int board[9][9];
     bool valid;
+    bool validRows[9];
+    bool validColumns[9];
+    bool validSquares[9];
     int row;
     int id;
     pthread_mutex_t m; // to ensure id is passed successfully
@@ -24,6 +27,7 @@ int _atoi(char c){
     return i;
 }
 
+// for debugging
 void printData(struct Data* data){
     for(int i = 0; i < 9; i++){
         printf("%d %d %d    %d %d %d    %d %d %d\n", data->board[i][0], data->board[i][1], data->board[i][2],
@@ -80,11 +84,12 @@ void validateRow(struct Data* data){
         if(data->board[row][i] < 1 
             || data->board[row][i] > 9
             || rowCount[data->board[row][i] - 1] > 1){
-           printf("Row %d doesn't have the required values.\n", row + 1);
            data->valid = false;
+           data->validRows[row] = false;
            return;
         }
     }
+    data->validRows[row] = true;
 }
 
 void validateColumn(struct Data *data){
@@ -96,11 +101,12 @@ void validateColumn(struct Data *data){
         if(data->board[i][column] < 1 
             || data->board[i][column] > 9
             || colCount[data->board[i][column] - 1] > 1){
-            printf("Column %d doesn't have the required values.\n", column + 1);
             data->valid = false;
+            data->validColumns[column] = false;
             return;
         }
     }
+    data->validColumns[column] = true;
 }
 
 void validateSquare(struct Data *data){
@@ -118,13 +124,14 @@ void validateSquare(struct Data *data){
            if(data->board[i][j] < 1 
                || data->board[i][j] > 9
                || sqrCount[data->board[i][j] - 1] > 1){
-               printf("Square %d doesn't have the required values.\n", square + 1);
                data->valid = false;
+               data->validSquares[square] = false;
                return;
            }
 
         }
     }
+    data->validSquares[square] = true;
 }
 
 void validateBoard(struct Data* data){
@@ -166,6 +173,20 @@ void validateBoard(struct Data* data){
     free(thread_handles);
 
     // print results
+    for(int i = 0; i < 9; i++){
+        if(!data->validRows[i]){
+           printf("Row %d doesn't have the required values.\n", i + 1);
+        }
+
+        if(!data->validColumns[i]){
+           printf("Column %d doesn't have the required values.\n", i + 1);
+        }
+
+        if(!data->validSquares[i]){
+           printf("Square %d doesn't have the required values.\n", i + 1);
+        }
+    }
+
     if(data->valid){
         printf("This input is a valid Sudoku.\n");
     } else {
