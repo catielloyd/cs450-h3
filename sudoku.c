@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<pthread.h>
 
 
 #define true 1
@@ -11,6 +12,9 @@ struct Data {
     int board[9][9];
     bool valid;
     int row;
+    int id;
+    pthread_mutex_t m; // to ensure id is passed successfully
+    pthread_cond_t cv; // to signal id has been passed successfully
 };
 
 int _atoi(char c){
@@ -67,37 +71,41 @@ char* nameOfSubgrid(int i){
     }
 }
 
-bool validateRow(struct Data* data, int row){
+void validateRow(struct Data* data){
+    int row = data->id;
+    pthread_cond_signal(&data->cv);
     int rowCount[9] = {0,0,0,0,0,0,0,0,0};
     for(int i = 0; i < 9; i++){
-        if(data->board[row][i] < 1 || data->board[row][i] > 9){
-           return false; 
-        }
-
         rowCount[data->board[row][i] - 1]++;
-        if(rowCount[data->board[row][i] - 1] > 1){
-            return false;
+        if(data->board[row][i] < 1 
+            || data->board[row][i] > 9
+            || rowCount[data->board[row][i] - 1] > 1){
+           printf("Row %d doesn't have the required values.\n", row + 1);
+           data->valid = false;
+           return;
         }
     }
-    return true;
 }
 
-bool validateColumn(struct Data *data, int column){
+void validateColumn(struct Data *data){
+    int column = data->id;
+    pthread_cond_signal(&data->cv);
     int colCount[9] = {0,0,0,0,0,0,0,0,0};
     for(int i = 0; i < 9; i++){
-        if(data->board[i][column] < 1 || data->board[i][column] > 9){
-           return false; 
-        }
-
         colCount[data->board[i][column] - 1]++;
-        if(colCount[data->board[i][column] - 1] > 1){
-            return false;
+        if(data->board[i][column] < 1 
+            || data->board[i][column] > 9
+            || colCount[data->board[i][column] - 1] > 1){
+            printf("Column %d doesn't have the required values.\n", column + 1);
+            data->valid = false;
+            return;
         }
     }
-    return true;
 }
 
-bool validateSquare(struct Data *data, int square){
+void validateSquare(struct Data *data){
+    int square = data->id;
+    pthread_cond_signal(&data->cv);
     int sqrCount[9] = {0,0,0,0,0,0,0,0,0};
     int columnStart = (square % 3) * 3;
     int columnEnd = columnStart + 3;
@@ -106,36 +114,58 @@ bool validateSquare(struct Data *data, int square){
 
     for(int i = rowStart; i < rowEnd; i++) {
         for (int j = columnStart; j < columnEnd; j++) {
-           if(data->board[i][j] < 1 || data->board[i][j] > 9){
-               return false;
+           sqrCount[data->board[i][j] - 1]++;
+           if(data->board[i][j] < 1 
+               || data->board[i][j] > 9
+               || sqrCount[data->board[i][j] - 1] > 1){
+               printf("Square %d doesn't have the required values.\n", square + 1);
+               data->valid = false;
+               return;
            }
 
-           sqrCount[data->board[i][j] - 1]++;
-           if(sqrCount[data->board[i][j] - 1] > 1){
-               return false;
-           }
         }
     }
-    return true;
 }
 
 void validateBoard(struct Data* data){
     data->valid = true;
-    printf("Testing board...\n");
+
+    int total_threads = 27; // 9 rows + 9 columns + 9 squares
+    int thread_i = 0;
+    pthread_t* thread_handles =  malloc(total_threads * sizeof(pthread_t));
+    pthread_mutex_init(&data->m, NULL); // initialize id lock
+    pthread_cond_init(&data->cv, NULL); //initialize id signal
+
     for(int i = 0; i < 9; i++){
-        if(!validateRow(data, i)) {
-            printf("Row %d doesn't have the required values.\n", i + 1);
-            data->valid = false;
-        }
-        if(!validateColumn(data, i)) {
-            printf("Column %d doesn't have the required values.\n", i + 1);
-            data->valid = false;
-        }
-        if(!validateSquare(data, i)) {
-            printf("The %s subgrid doesn't have the required values.\n", nameOfSubgrid(i));
-            data->valid = false;
-        }
+        data->id = i;
+        
+        // check rows
+        pthread_create(&thread_handles[thread_i], NULL, validateRow, data); // create thread
+        thread_i++; // increment thread counter
+        while(pthread_cond_wait(&data->cv, &data->m));
+
+
+        // check columns
+        pthread_create(&thread_handles[thread_i], NULL, validateColumn, data); // create thread
+        thread_i++; // increment thread counter
+        while(pthread_cond_wait(&data->cv, &data->m));
+        
+        // check squares
+        pthread_create(&thread_handles[thread_i], NULL, validateSquare, data); // create thread
+        thread_i++; // increment thread counter
+        while(pthread_cond_wait(&data->cv, &data->m));
     }
+
+
+    // join threads
+    for(int i = 0; i < thread_i; i++){
+        pthread_join(thread_handles[i], NULL);
+    }
+
+    // cleanup
+    free(thread_handles);
+
+    // print results
     if(data->valid){
         printf("This input is a valid Sudoku.\n");
     } else {
@@ -146,6 +176,7 @@ void validateBoard(struct Data* data){
 int main() {
     struct Data data;
     char* line[MAX_LINE_SIZE];
+    data.row = 0;
     while(fgets(line, MAX_LINE_SIZE, stdin) && data.row < 9) {
         parseRow(&data, line);
     }
