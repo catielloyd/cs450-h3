@@ -1,3 +1,8 @@
+/* GROUP MEMBERS:
+ * Catie Lloyd
+ * Amanda Tomasetti
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include<pthread.h>
