@@ -52,7 +52,8 @@ void parseRow(struct Data* data, char* row){
         }
         row++;
     }
-    data->row++;
+    if(column == 9)
+        data->row++;
 }
 
 char* nameOfSubgrid(int i){
@@ -206,7 +207,6 @@ int main() {
     while(fgets(line, MAX_LINE_SIZE, stdin) && data.row < 9) {
         parseRow(&data, line);
     }
-
     validateBoard(&data);
 
     return 0;
